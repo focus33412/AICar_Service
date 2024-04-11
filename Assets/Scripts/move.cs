@@ -1,25 +1,37 @@
-
 using UnityEngine;
 
-public class move : MonoBehaviour
+public class MouseDragCamera : MonoBehaviour
 {
-    private Vector2 startPos;
+    public float dragSpeed = 2f;
+    public float minYPosition = 1f; // Минимальная позиция по оси Y
 
-    private Camera cam;
+    private Vector3 dragOrigin;
+    private float startYPosition;
 
-    private void Start()
+    void Start()
     {
-        cam = GetComponent<Camera>();
+        startYPosition = transform.position.y; // Запоминаем стартовую позицию камеры по оси Y
     }
 
-    private void Update()
+    void Update()
     {
-        if (Input.GetMouseButtonDown(0)) startPos = cam.ScreenToWorldPoint(Input.mousePosition);
-        else if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0))
         {
-            float pos = cam.ScreenToWorldPoint(Input.mousePosition).x - startPos.x;
-            transform.position = new Vector3 (transform.position.x - pos, transform.position.y, transform.position.z);
+            dragOrigin = Input.mousePosition;
+            return;
         }
-    }
 
+        if (!Input.GetMouseButton(0)) return;
+
+        Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - dragOrigin);
+        Vector3 move = new Vector3(-pos.x * dragSpeed, 0, -pos.y * dragSpeed);
+
+        // Применяем перемещение камеры
+        transform.Translate(move, Space.World);
+
+        // Ограничиваем позицию камеры по оси Y
+        Vector3 clampedPosition = transform.position;
+        clampedPosition.y = Mathf.Clamp(clampedPosition.y, startYPosition, Mathf.Infinity);
+        transform.position = clampedPosition;
+    }
 }
