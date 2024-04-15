@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class FollowPath : MonoBehaviour
 {
-
     public enum MovementType
     {
         Moving,
@@ -15,11 +14,11 @@ public class FollowPath : MonoBehaviour
     public MovementPath MyPath;
     public float speed = 1;
     public float maxDistance = .1f;
+    public float rotationSpeed = 5f; // скорость поворота
 
     private IEnumerator<Transform> pointInPath;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         if (MyPath == null)
         {
@@ -31,7 +30,7 @@ public class FollowPath : MonoBehaviour
 
         pointInPath.MoveNext();
 
-        if(pointInPath.Current == null)
+        if (pointInPath.Current == null)
         {
             Debug.Log("Нужны точки");
             return;
@@ -40,13 +39,14 @@ public class FollowPath : MonoBehaviour
         transform.position = pointInPath.Current.position;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (pointInPath == null || pointInPath.Current == null)
         {
             return;
         }
+
+
 
         if (Type == MovementType.Moving)
         {
@@ -59,9 +59,12 @@ public class FollowPath : MonoBehaviour
 
         var distanceSqure = (transform.position - pointInPath.Current.position).sqrMagnitude;
 
-        if(distanceSqure < maxDistance * maxDistance)
+        if (distanceSqure < maxDistance * maxDistance)
         {
             pointInPath.MoveNext();
         }
     }
+
+    // Метод для поворота объекта в сторону цели
+
 }
