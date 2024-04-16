@@ -46,7 +46,8 @@ public class FollowPath : MonoBehaviour
             return;
         }
 
-
+        // Поворачиваем объект в сторону следующей точки пути
+        RotateTowards(pointInPath.Current.position);
 
         if (Type == MovementType.Moving)
         {
@@ -66,5 +67,10 @@ public class FollowPath : MonoBehaviour
     }
 
     // Метод для поворота объекта в сторону цели
-
+    private void RotateTowards(Vector3 targetPosition)
+    {
+        Vector3 direction = (targetPosition - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(-direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+    }
 }
