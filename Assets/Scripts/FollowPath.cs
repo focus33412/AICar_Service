@@ -12,9 +12,9 @@ public class FollowPath : MonoBehaviour
 
     public MovementType Type = MovementType.Moving;
     public MovementPath MyPath;
-    public float speed = 1;
-    public float maxDistance = .1f;
-    public float rotationSpeed = 5f; // скорость поворота
+    public float speed = 1f;
+    public float maxDistance = 0.1f;
+    public float rotationSpeed = 5f;
 
     private IEnumerator<Transform> pointInPath;
 
@@ -27,26 +27,17 @@ public class FollowPath : MonoBehaviour
         }
 
         pointInPath = MyPath.GetNextPathPoint();
-
         pointInPath.MoveNext();
-
-        if (pointInPath.Current == null)
-        {
-            Debug.Log("Нужны точки");
-            return;
-        }
-
-        transform.position = pointInPath.Current.position;
+        transform.position = pointInPath.Current.position;  // Стартовая позиция
     }
 
     private void Update()
     {
-        if (pointInPath == null || pointInPath.Current == null)
+        if (pointInPath == null || pointInPath.Current == null || MyPath.transitionCondition < 4)
         {
             return;
         }
 
-        // Поворачиваем объект в сторону следующей точки пути
         RotateTowards(pointInPath.Current.position);
 
         if (Type == MovementType.Moving)
@@ -58,19 +49,18 @@ public class FollowPath : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, pointInPath.Current.position, Time.deltaTime * speed);
         }
 
-        var distanceSqure = (transform.position - pointInPath.Current.position).sqrMagnitude;
+        float distanceSquare = (transform.position - pointInPath.Current.position).sqrMagnitude;
 
-        if (distanceSqure < maxDistance * maxDistance)
+        if (distanceSquare < maxDistance * maxDistance && MyPath.movingTo < MyPath.PathElements.Length - 1)
         {
             pointInPath.MoveNext();
         }
     }
 
-    // Метод для поворота объекта в сторону цели
     private void RotateTowards(Vector3 targetPosition)
     {
         Vector3 direction = (targetPosition - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(-direction);
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
     }
 }

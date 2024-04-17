@@ -14,9 +14,12 @@ public class MovementPath : MonoBehaviour
     public int movementDirection = 1;
     public int movingTo = 0;
     public Transform[] PathElements;
-    public MovementPath NextPath; // Следующий путь
+    public MovementPath NextPath;
     public GameObject car;
     private int k = 0;
+
+    public int transitionCondition = 0;  // Условие для начала следующего пути
+
     public void OnDrawGizmos()
     {
         if (PathElements == null || PathElements.Length < 2)
@@ -29,7 +32,7 @@ public class MovementPath : MonoBehaviour
 
         if (PathType == PathTypes.Loop)
         {
-            Gizmos.DrawLine(PathElements[0].position, PathElements[PathElements.Length - 1].position);
+            Gizmos.DrawLine(PathElements[PathElements.Length - 1].position, PathElements[0].position);
         }
     }
 
@@ -44,44 +47,38 @@ public class MovementPath : MonoBehaviour
 
             if (movingTo >= PathElements.Length - 1)
             {
-                // Переход на следующий путь, если текущий завершен
-                if (NextPath != null)
+                if (NextPath != null && transitionCondition >= 4)
                 {
-                    movingTo = 0; // Установка на начало нового пути
-                    yield return null; // Для паузы между путями, если требуется
-                    NextPath.StartNextPath(); // Запуск следующего пути
+                    movingTo = 0;
+                      // Пауза перед переходом на следующий путь
+                    NextPath.StartNextPath();
                     yield break;
                 }
                 else
                 {
-                    yield break; // Завершение перемещения, если нет следующего пути
+                    // Ожидание события для перехода
+                    yield return null;
                 }
             }
+            else
+            {
+                movingTo += movementDirection;
+            }
+        }
+    }
 
-            movingTo += movementDirection;
-        }
-    }
-    public void krra()
-    {
-        k++;
-    }
-    private void Update()
-    {
-        if (k > 0)
-        {
-            car.transform.Translate(transform.up*1);
-        car.transform.Rotate(0, 50, 0);
-        }
-        
-    }
-    // Запуск следующего пути
     public void StartNextPath()
     {
-        if (NextPath != null && NextPath.PathElements.Length > 0)
+        if (NextPath != null && NextPath.PathElements.Length > 0 && transitionCondition >= 4)
         {
-            // Установка объекта на начало следующего пути
             transform.position = NextPath.PathElements[0].position;
             movingTo = 0;
+            transitionCondition = 0;  // Сброс условия для следующего пути
         }
+    }
+
+    public void cond()
+    {
+        transitionCondition++;
     }
 }
